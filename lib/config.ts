@@ -1,22 +1,110 @@
-const ROLE_TYPE = {
-  ADMIN: "admin",
-  PLAYER: "player",
-  ORGANIZER: "organizer",
+import { TRoleType, TSkillLevel } from "@/typings";
+
+export const ADMIN_LINKS = [
+  {
+    id: "dashboard",
+    path: "/admin",
+    label: "Dashboard",
+  },
+  {
+    id: "members",
+    path: "/admin/members",
+    label: "Members",
+  },
+];
+export const SKILL_LEVEL = {
+  BEGINNER: {
+    id: "BEGINNER" as TSkillLevel,
+    label: "Beginner",
+    description:
+      "New to pickleball. Learning rules, basic strokes, and court positioning.",
+    color: {
+      text: "#22c55e", // gray-500
+    },
+  },
+  NOVICE: {
+    id: "NOVICE" as TSkillLevel,
+    label: "Novice",
+    description:
+      "Understands rules and basic positioning. Can rally and serve consistently but lacks shot control and strategy.",
+    color: {
+      text: "#3B82F6", // blue-500
+    },
+  },
+  INTERMEDIATE: {
+    id: "INTERMEDIATE" as TSkillLevel,
+    label: "Intermediate",
+    description:
+      "Consistent rallies, basic dinking and third-shot drops. Developing strategy and court awareness.",
+    color: {
+      text: "#f43f5e", // green-500
+    },
+  },
+  ADVANCED: {
+    id: "ADVANCED" as TSkillLevel,
+    label: "Advanced",
+    description:
+      "Strong control, consistent dinks and resets. Uses strategy, pace, and placement effectively.",
+    color: {
+      text: "#eab308", // orange-500
+    },
+  },
+  PRO: {
+    id: "PRO" as TSkillLevel,
+    label: "Open / Pro",
+    description:
+      "High-level competitive player with advanced tactics, consistency, and tournament experience.",
+    color: {
+      text: "#a855f7", // red-500
+    },
+  },
+} as const;
+
+export const SKILL_LEVELS = [
+  SKILL_LEVEL.BEGINNER,
+  SKILL_LEVEL.NOVICE,
+  SKILL_LEVEL.INTERMEDIATE,
+  SKILL_LEVEL.ADVANCED,
+  SKILL_LEVEL.PRO,
+];
+export const ROLE_TYPE = {
+  ADMIN: "ADMIN" as TRoleType,
+  MEMBER: "MEMBER" as TRoleType,
+  VISITOR: "VISITOR" as TRoleType,
+  MANAGER: "MANAGER" as TRoleType,
 };
 export const ROLE_TYPES = [
   ROLE_TYPE.ADMIN,
-  ROLE_TYPE.PLAYER,
-  ROLE_TYPE.ORGANIZER,
+  ROLE_TYPE.MEMBER,
+  ROLE_TYPE.VISITOR,
+  ROLE_TYPE.MANAGER,
 ];
+export const OPTIONS_HOUR = Array.from({ length: 12 }, (_, index) => {
+  const hour = index + 1; // Generates numbers from 1 to 12
+  return {
+    value: hour.toString(),
+    label: `${hour}`,
+  };
+});
 
+export const OPTIONS_MINUTE = Array.from({ length: 12 }, (_, index) => {
+  const minute = index * 5; // Generates 0, 5, 10, ..., 55
+  return {
+    value: minute.toString().padStart(2, "0"), // Ensures two-digit format
+    label: minute.toString().padStart(2, "0"),
+  };
+});
 export const DB_METHOD_STATUS = {
   SUCCESS: "success",
   ERROR: "error",
 };
 
-export const DB_COLLECTION_NAME = {
+export const DB_COLLECTION = {
   SPORTS: "sports",
   FACILITIES: "facilities",
+  USERS: "users",
+  SESSIONS: "sessions",
+  MEMBERS: "members",
 };
 
 export const PH_PROVINCES: string[] = [

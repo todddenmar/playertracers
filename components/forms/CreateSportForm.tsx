@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useState } from "react";
-import { DB_COLLECTION_NAME, DB_METHOD_STATUS } from "@/lib/config";
+import { DB_COLLECTION, DB_METHOD_STATUS } from "@/lib/config";
 import { dbSetDocument } from "@/lib/firebase/actions";
 import { TSport } from "@/typings";
 import { useAppStore } from "@/lib/store";
@@ -51,7 +51,7 @@ export function CreateSportForm({ setClose }: CreateSportFormProps) {
       description: description,
     };
     const res = await dbSetDocument(
-      DB_COLLECTION_NAME.SPORTS,
+      DB_COLLECTION.SPORTS,
       newSport.id,
       newSport
     );

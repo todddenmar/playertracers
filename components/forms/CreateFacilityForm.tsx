@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useState } from "react";
-import { DB_COLLECTION_NAME, DB_METHOD_STATUS } from "@/lib/config";
+import { DB_COLLECTION, DB_METHOD_STATUS } from "@/lib/config";
 import { dbSetDocument } from "@/lib/firebase/actions";
 import { TFacility } from "@/typings";
 import { useAppStore } from "@/lib/store";
@@ -79,9 +79,10 @@ export function CreateFacilityForm({ setClose }: CreateFacilityFormProps) {
       city: city,
       province: province,
       sportIDs,
+      users: [],
     };
     const res = await dbSetDocument(
-      DB_COLLECTION_NAME.FACILITIES,
+      DB_COLLECTION.FACILITIES,
       newFacility.id,
       newFacility
     );

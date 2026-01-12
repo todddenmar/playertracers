@@ -13,10 +13,54 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { DB_METHOD_STATUS } from "../config";
+export const dbFetchDocument = async <T>({
+  collectionName,
+  id,
+}: {
+  collectionName: string;
+  id: string;
+}) => {
+  try {
+    const docRef = doc(db, collectionName, id);
+    const docSnap = await getDoc(docRef);
 
+    if (!docSnap.exists()) {
+      return { status: DB_METHOD_STATUS.ERROR, message: "No data found" }; // No data found
+    }
+
+    return { status: DB_METHOD_STATUS.SUCCESS, data: docSnap.data() as T };
+  } catch (e) {
+    return {
+      status: DB_METHOD_STATUS.ERROR,
+      message: e instanceof Error ? e.message : "An unknown error occurred",
+    };
+  }
+};
 export const dbFetchCollection = async <T>(collectionName: string) => {
   try {
     const q = query(collection(db, collectionName));
+    const querySnapshot = await getDocs(q);
+    const results: T[] = querySnapshot.docs.map((doc) => doc.data() as T);
+    return { status: DB_METHOD_STATUS.SUCCESS, data: results };
+  } catch (e) {
+    return {
+      status: DB_METHOD_STATUS.ERROR,
+      message: e instanceof Error ? e.message : "An unknown error occurred",
+    };
+  }
+};
+
+export const dbFetchSubCollection = async <T>({
+  collectionName,
+  id,
+  collectionName2,
+}: {
+  collectionName: string;
+  id: string;
+  collectionName2: string;
+}) => {
+  try {
+    const q = query(collection(db, collectionName, id, collectionName2));
     const querySnapshot = await getDocs(q);
     const results: T[] = querySnapshot.docs.map((doc) => doc.data() as T);
     return { status: DB_METHOD_STATUS.SUCCESS, data: results };

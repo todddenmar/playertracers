@@ -1,0 +1,124 @@
+import EmptyLayout from "@/components/custom-ui/EmptyLayout";
+import { cn, customDateFormat } from "@/lib/utils";
+import { isToday } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { EllipsisVerticalIcon, PlusIcon } from "lucide-react";
+import { useState } from "react";
+import { useAppStore } from "@/lib/store";
+import { ROLE_TYPE, SKILL_LEVELS } from "@/lib/config";
+import { CreateNewFacilityMemberForm } from "@/components/forms/CreateNewFacilityMemberForm";
+
+function FacilityMembersSection() {
+  const { currentUser, currentMembers, currentFacility } = useAppStore();
+  const [isOpenAddMember, setIsOpenAddMember] = useState(false);
+
+  const facilityUser = currentFacility?.users.find(
+    (item) => item.emailAddress === currentUser?.emailAddress
+  );
+  return (
+    <div className="flex-1 border p-4 rounded-lg flex flex-col gap-4">
+      <div className="flex justify-between items-center gap-4">
+        <h4 className="text-lg font-semibold">Members</h4>
+        {facilityUser
+          ? [ROLE_TYPE.ADMIN, ROLE_TYPE.MANAGER].includes(
+              facilityUser?.roleType
+            ) && (
+              <Button type="button" onClick={() => setIsOpenAddMember(true)}>
+                <PlusIcon />
+                Add New Member
+              </Button>
+            )
+          : null}
+
+        <Dialog open={isOpenAddMember} onOpenChange={setIsOpenAddMember}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Adding a Member</DialogTitle>
+              <DialogDescription>
+                Fill all the required fields
+              </DialogDescription>
+            </DialogHeader>
+            <CreateNewFacilityMemberForm
+              setClose={() => setIsOpenAddMember(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="flex-1 flex flex-col gap-4">
+        {SKILL_LEVELS.map((item, idx) => {
+          const membersBySkill = currentMembers.filter(
+            (m) => m.skillLevel === item.id
+          );
+          return (
+            <div
+              key={`skill-level-${item}-${idx}`}
+              className="flex flex-col gap-2"
+            >
+              <div>
+                <div>
+                  <span
+                    style={{
+                      color: item.color.text,
+                    }}
+                    className={cn("font-semibold")}
+                  >
+                    {item.label}
+                  </span>{" "}
+                  <span className="text-muted-foreground">
+                    {membersBySkill.length}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {item.description}
+                </p>
+              </div>
+              {membersBySkill.length > 0 ? (
+                <div className="space-y-2">
+                  {membersBySkill.map((member) => {
+                    const isExpired = isToday(new Date(member.expirationDate));
+                    return (
+                      <div
+                        key={`member-item-${member.id}`}
+                        className="flex items-center gap-2  border rounded-lg p-2"
+                      >
+                        <div className="space-y-2 flex-1">
+                          <div>
+                            <div>{`${member.firstName} ${member.lastName}`}</div>
+                          </div>
+                          <div className="flex justify-end text-muted-foreground text-xs">
+                            <div
+                              className={isExpired ? "text-destructive" : ""}
+                            >
+                              {"Expired: "}
+                              {customDateFormat(
+                                new Date(member.expirationDate)
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <Button size={"icon"} variant={"ghost"} type="button">
+                          <EllipsisVerticalIcon />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyLayout>None</EmptyLayout>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default FacilityMembersSection;
