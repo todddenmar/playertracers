@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import UsersList from "@/components/settings/UsersList";
 import ErrorCard from "@/components/custom-ui/ErrorCard";
+import Cookies from "js-cookie";
 function SettingsPage() {
   const { currentSports, currentFacilities, currentUser, setCurrentFacility } =
     useAppStore();
@@ -28,12 +29,23 @@ function SettingsPage() {
   const [selectedFacilityID, setSelectedFacilityID] = useState<string | null>(
     null
   );
-
+  const isAdmin =
+    process.env.NEXT_PUBLIC_ADMIN_EMAIL === currentUser?.emailAddress;
   if (!currentUser) {
     return (
       <ErrorCard
         title="User not found"
         description="Please login to access this page."
+        linkText="Go Back"
+        redirectionLink={`/`}
+      />
+    );
+  }
+  if (!isAdmin) {
+    return (
+      <ErrorCard
+        title="No Access"
+        description="Please login as an admin."
         linkText="Go Back"
         redirectionLink={`/`}
       />
@@ -128,6 +140,10 @@ function SettingsPage() {
                             size={"icon"}
                             onClick={() => {
                               setCurrentFacility(item);
+                              Cookies.set("facilityID", item.id, {
+                                expires: 1, // days
+                                path: "/",
+                              });
                             }}
                           >
                             <Link href={"/admin"}>

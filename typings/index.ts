@@ -43,6 +43,7 @@ export type TMembership = {
   lastName: string;
   createdAt: string;
   skillLevel: string;
+  mobileNumber: string;
 };
 
 export type TSessionType = "RENTAL" | "OPEN_PLAY";
@@ -66,7 +67,8 @@ export type TSession = {
 export type TCourt = {
   id: string;
   name: string;
-  order: number;
+  description: string;
+  orderNumber: number;
   facilityID: string;
 };
 

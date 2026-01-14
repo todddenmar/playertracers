@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { DB_COLLECTION, DB_METHOD_STATUS, SKILL_LEVELS } from "@/lib/config";
-import { dbSetSubDocument } from "@/lib/firebase/actions";
+import { dbUpdateSubDocument } from "@/lib/firebase/actions";
 import { TMembership } from "@/typings";
 import { useAppStore } from "@/lib/store";
 import LoadingComponent from "../custom-ui/LoadingComponent";
@@ -39,22 +39,24 @@ const FormSchema = z.object({
   }),
 });
 
-type CreateNewFacilityMemberFormProps = {
+type EditFacilityMemberFormProps = {
   setClose: () => void;
+  member: TMembership;
 };
-export function CreateNewFacilityMemberForm({
+export function EditFacilityMemberForm({
+  member,
   setClose,
-}: CreateNewFacilityMemberFormProps) {
+}: EditFacilityMemberFormProps) {
   const { currentFacility, currentMembers, setCurrentMembers } = useAppStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [skillLevel, setSkillLevel] = useState<string>("");
+  const [skillLevel, setSkillLevel] = useState<string>(member.skillLevel || "");
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      firstname: "",
-      lastname: "",
-      emailAddress: "",
-      mobileNumber: "",
+      firstname: member.firstName || "",
+      lastname: member.lastName || "",
+      emailAddress: member.emailAddress || "",
+      mobileNumber: member.mobileNumber || "",
     },
   });
 
@@ -69,9 +71,7 @@ export function CreateNewFacilityMemberForm({
     }
     const { emailAddress, firstname, lastname, mobileNumber } = data;
     setIsLoading(true);
-    const newMember: TMembership = {
-      id: crypto.randomUUID(),
-      playerID: null,
+    const updates: Partial<TMembership> = {
       emailAddress: emailAddress,
       firstName: firstname,
       lastName: lastname,
@@ -80,19 +80,25 @@ export function CreateNewFacilityMemberForm({
       skillLevel: skillLevel,
       mobileNumber: mobileNumber,
     };
-    const res = await dbSetSubDocument(
+    const updatedMember = {
+      ...member,
+      ...updates,
+    };
+    const res = await dbUpdateSubDocument(
       DB_COLLECTION.FACILITIES,
       currentFacility.id,
       DB_COLLECTION.MEMBERS,
-      newMember.id,
-      newMember
+      member.id,
+      updates
     );
 
     if (res.status === DB_METHOD_STATUS.SUCCESS) {
-      const updatedMembers = [...(currentMembers || []), newMember];
+      const updatedMembers = currentMembers.map((item) =>
+        item.id === member.id ? updatedMember : item
+      );
       setCurrentMembers(updatedMembers);
 
-      toast.success("Member added successfully ");
+      toast.success("Member updated successfully ");
       setIsLoading(false);
       setClose();
     }

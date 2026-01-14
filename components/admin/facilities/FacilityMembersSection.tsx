@@ -9,17 +9,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { EllipsisVerticalIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { ROLE_TYPE, SKILL_LEVELS } from "@/lib/config";
 import { CreateNewFacilityMemberForm } from "@/components/forms/CreateNewFacilityMemberForm";
+import FacilityMemberActionButton from "@/components/pages/facility/buttons/FacilityActionButton";
 
 function FacilityMembersSection() {
   const { currentUser, currentMembers, currentFacility } = useAppStore();
   const [isOpenAddMember, setIsOpenAddMember] = useState(false);
 
-  const facilityUser = currentFacility?.users.find(
+  const facilityUser = currentFacility?.users?.find(
     (item) => item.emailAddress === currentUser?.emailAddress
   );
   return (
@@ -103,9 +104,7 @@ function FacilityMembersSection() {
                             </div>
                           </div>
                         </div>
-                        <Button size={"icon"} variant={"ghost"} type="button">
-                          <EllipsisVerticalIcon />
-                        </Button>
+                        <FacilityMemberActionButton member={member} />
                       </div>
                     );
                   })}

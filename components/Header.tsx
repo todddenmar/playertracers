@@ -3,22 +3,67 @@ import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { dbFetchCollection } from "@/lib/firebase/actions";
-import { DB_METHOD_STATUS } from "@/lib/config";
+import {
+  dbFetchCollection,
+  dbFetchDocument,
+  dbFetchSubCollection,
+} from "@/lib/firebase/actions";
+import { DB_COLLECTION, DB_METHOD_STATUS } from "@/lib/config";
 import { useAppStore } from "@/lib/store";
-import { TFacility, TSport } from "@/typings";
+import { TFacility, TMembership, TSport } from "@/typings";
 import UserAvatarButton from "./custom-ui/UserAvatarButton";
 import Image from "next/image";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
-
+import Cookies from "js-cookie";
 function Header() {
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const { setCurrentSports, setCurrentFacilities, setCurrentUser } =
-    useAppStore();
+  const {
+    setCurrentSports,
+    setCurrentFacilities,
+    setCurrentUser,
+    setCurrentFacility,
+    setCurrentMembers,
+  } = useAppStore();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const id = Cookies.get("facilityID");
+    if (id) {
+      const fetchFacility = async () => {
+        const res = await dbFetchDocument({
+          collectionName: DB_COLLECTION.FACILITIES,
+          id: id,
+        });
+        if (res.status === DB_METHOD_STATUS.ERROR) {
+          console.error(res.message);
+          return;
+        }
+        if (res.data) {
+          console.log({ res: res.data });
+          setCurrentFacility(res.data as TFacility);
+        }
+      };
+      fetchFacility();
+
+      const fetchMembers = async () => {
+        const res = await dbFetchSubCollection({
+          collectionName: DB_COLLECTION.FACILITIES,
+          id: id,
+          collectionName2: DB_COLLECTION.MEMBERS,
+        });
+        if (res.status === DB_METHOD_STATUS.ERROR) {
+          console.error(res.message);
+          return;
+        }
+        if (res.data) {
+          setCurrentMembers(res.data as TMembership[]);
+        }
+      };
+      fetchMembers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
@@ -33,6 +78,7 @@ function Header() {
         console.log({ firebaseUser });
       } else {
         setCurrentUser(null);
+        setIsAdmin(false);
       }
     });
 

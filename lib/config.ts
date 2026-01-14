@@ -11,6 +11,11 @@ export const ADMIN_LINKS = [
     path: "/admin/members",
     label: "Members",
   },
+  {
+    id: "courts",
+    path: "/admin/courts",
+    label: "Courts",
+  },
 ];
 export const SKILL_LEVEL = {
   BEGINNER: {
@@ -105,6 +110,7 @@ export const DB_COLLECTION = {
   USERS: "users",
   SESSIONS: "sessions",
   MEMBERS: "members",
+  COURTS: "courts",
 };
 
 export const PH_PROVINCES: string[] = [
