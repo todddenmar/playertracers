@@ -46,8 +46,6 @@ function FacilityMemberActionButton({
           >
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Team</DropdownMenuItem>
           <DropdownMenuItem>Subscription</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

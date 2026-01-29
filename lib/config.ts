@@ -1,5 +1,8 @@
-import { TRoleType, TSkillLevel } from "@/typings";
+import { TGender, TRoleType, TSkillLevel } from "@/typings";
 
+export const REPEATING_TEXT = {
+  formDescription: "Please fill up the required fields.",
+};
 export const ADMIN_LINKS = [
   {
     id: "dashboard",
@@ -54,6 +57,15 @@ export const SKILL_LEVEL = {
       text: "#eab308", // orange-500
     },
   },
+  ADVANCED_INTERMEDIATE: {
+    id: "ADVANCED_INTERMEDIATE" as TSkillLevel,
+    label: "Advanced Intermediate",
+    description:
+      "Reliable dinks, third-shot drops, and resets. Understands positioning, stacking, and shot selection but lacks elite consistency.",
+    color: {
+      text: "#10b981", // emerald-500
+    },
+  },
   PRO: {
     id: "PRO" as TSkillLevel,
     label: "Open / Pro",
@@ -69,6 +81,7 @@ export const SKILL_LEVELS = [
   SKILL_LEVEL.BEGINNER,
   SKILL_LEVEL.NOVICE,
   SKILL_LEVEL.INTERMEDIATE,
+  SKILL_LEVEL.ADVANCED_INTERMEDIATE,
   SKILL_LEVEL.ADVANCED,
   SKILL_LEVEL.PRO,
 ];
@@ -103,6 +116,16 @@ export const DB_METHOD_STATUS = {
   SUCCESS: "success",
   ERROR: "error",
 };
+export const GENDERS = [
+  {
+    id: "MALE" as TGender,
+    label: "Male",
+  },
+  {
+    id: "FEMALE" as TGender,
+    label: "Female",
+  },
+];
 
 export const DB_COLLECTION = {
   SPORTS: "sports",

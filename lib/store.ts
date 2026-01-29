@@ -1,4 +1,11 @@
-import { TCourt, TFacility, TMembership, TSport, TUser } from "@/typings";
+import {
+  TCourt,
+  TFacility,
+  TFirebaseUser,
+  TMembership,
+  TSport,
+  TUser,
+} from "@/typings";
 import { create } from "zustand";
 
 export type TAppStoreStates = {
@@ -8,6 +15,8 @@ export type TAppStoreStates = {
   currentMembers: TMembership[];
   currentFacility: TFacility | null;
   currentCourts: TCourt[];
+  currentUsers: TUser[];
+  currentFirebaseUser: TFirebaseUser | null;
 };
 
 export type TAppStoreActions = {
@@ -17,6 +26,8 @@ export type TAppStoreActions = {
   setCurrentFacility: (currentFacility: TFacility | null) => void;
   setCurrentMembers: (currentMembers: TMembership[]) => void;
   setCurrentCourts: (currentCourts: TCourt[]) => void;
+  setCurrentUsers: (currentUsers: TUser[]) => void;
+  setCurrentFirebaseUser: (currentFirebaseUser: TFirebaseUser | null) => void;
 };
 export const useAppStore = create<TAppStoreStates & TAppStoreActions>(
   (set) => ({
@@ -35,5 +46,10 @@ export const useAppStore = create<TAppStoreStates & TAppStoreActions>(
     setCurrentCourts: (currentCourts) => set(() => ({ currentCourts })),
     currentFacility: null,
     setCurrentFacility: (currentFacility) => set(() => ({ currentFacility })),
-  })
+    currentUsers: [],
+    setCurrentUsers: (currentUsers) => set(() => ({ currentUsers })),
+    currentFirebaseUser: null,
+    setCurrentFirebaseUser: (currentFirebaseUser) =>
+      set(() => ({ currentFirebaseUser })),
+  }),
 );

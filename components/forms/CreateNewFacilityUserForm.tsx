@@ -13,19 +13,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import _ from "lodash";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
-import { DB_COLLECTION, DB_METHOD_STATUS, ROLE_TYPE } from "@/lib/config";
-import { dbUpdateDocument } from "@/lib/firebase/actions";
-import { TFacility, TFacilityUser, TRoleType } from "@/typings";
+import { DB_COLLECTION, DB_METHOD_STATUS } from "@/lib/config";
+import { dbSetDocument, dbUpdateDocument } from "@/lib/firebase/actions";
+import { TFacility, TFacilityUser, TUser } from "@/typings";
 import { useAppStore } from "@/lib/store";
 import LoadingComponent from "../custom-ui/LoadingComponent";
 import { Input } from "../ui/input";
@@ -46,7 +38,6 @@ export function CreateNewFacilityUserForm({
 }: CreateNewFacilityUserFormProps) {
   const { currentFacilities, setCurrentFacilities } = useAppStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [roleType, setRoleType] = useState<string>("");
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -57,34 +48,51 @@ export function CreateNewFacilityUserForm({
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!roleType) {
-      toast.error("Role type required");
-      return;
-    }
     const { emailAddress, firstname, lastname } = data;
     setIsLoading(true);
-    const newUser: TFacilityUser = {
+    const newUser: TUser = {
       id: crypto.randomUUID(),
       emailAddress: emailAddress,
       firstName: firstname,
       lastName: lastname,
-      roleType: roleType as TRoleType,
+      isVerified: false,
       createdAt: new Date().toISOString(),
     };
-    const updatedUsers = [...(facility.users || []), newUser];
-    const res = await dbUpdateDocument(DB_COLLECTION.FACILITIES, facility.id, {
-      users: updatedUsers,
-    });
+
+    const resCreate = await dbSetDocument(
+      DB_COLLECTION.USERS,
+      newUser.id,
+      newUser,
+    );
+    if (resCreate.status === DB_METHOD_STATUS.ERROR) {
+      console.error(resCreate.message);
+      return;
+    }
+
+    const updatedUserIDs: TFacilityUser[] = [
+      ...(facility.facilityUsers || []),
+      { userID: newUser.id, roleType: null },
+    ];
+    const resUPdate = await dbUpdateDocument(
+      DB_COLLECTION.FACILITIES,
+      facility.id,
+      {
+        userIDs: updatedUserIDs,
+      },
+    );
+
+    if (resUPdate.status === DB_METHOD_STATUS.ERROR) {
+      console.error(resUPdate.message);
+      return;
+    }
 
     const updatedFacilities = currentFacilities.map((item) =>
-      item.id === facility.id ? { ...facility, users: updatedUsers } : item
+      item.id === facility.id ? { ...facility, userIDs: updatedUserIDs } : item,
     );
     setCurrentFacilities(updatedFacilities);
-    if (res.status === DB_METHOD_STATUS.SUCCESS) {
-      toast.success("User added successfully ");
-      setIsLoading(false);
-      setClose();
-    }
+    toast.success("User created successfully ");
+    setIsLoading(false);
+    setClose();
   }
 
   return (
@@ -132,20 +140,7 @@ export function CreateNewFacilityUserForm({
             )}
           />
         </div>
-        <Select value={roleType} onValueChange={setRoleType}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Role" />
-          </SelectTrigger>
-          <SelectContent>
-            {[ROLE_TYPE.ADMIN, ROLE_TYPE.MANAGER].map((item, idx) => {
-              return (
-                <SelectItem key={`role-type-${idx}`} value={item}>
-                  {_.startCase(item.toLowerCase())}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+
         {isLoading ? (
           <LoadingComponent />
         ) : (

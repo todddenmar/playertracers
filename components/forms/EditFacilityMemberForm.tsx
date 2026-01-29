@@ -22,9 +22,14 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
-import { DB_COLLECTION, DB_METHOD_STATUS, SKILL_LEVELS } from "@/lib/config";
+import {
+  DB_COLLECTION,
+  DB_METHOD_STATUS,
+  GENDERS,
+  SKILL_LEVELS,
+} from "@/lib/config";
 import { dbUpdateSubDocument } from "@/lib/firebase/actions";
-import { TMembership } from "@/typings";
+import { TGender, TMembership } from "@/typings";
 import { useAppStore } from "@/lib/store";
 import LoadingComponent from "../custom-ui/LoadingComponent";
 import { Input } from "../ui/input";
@@ -50,6 +55,8 @@ export function EditFacilityMemberForm({
   const { currentFacility, currentMembers, setCurrentMembers } = useAppStore();
   const [isLoading, setIsLoading] = useState(false);
   const [skillLevel, setSkillLevel] = useState<string>(member.skillLevel || "");
+  const [gender, setGender] = useState((GENDERS[0]?.id as string) || "");
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -79,6 +86,7 @@ export function EditFacilityMemberForm({
       expirationDate: new Date().toISOString(),
       skillLevel: skillLevel,
       mobileNumber: mobileNumber,
+      gender: gender as TGender,
     };
     const updatedMember = {
       ...member,
@@ -89,12 +97,12 @@ export function EditFacilityMemberForm({
       currentFacility.id,
       DB_COLLECTION.MEMBERS,
       member.id,
-      updates
+      updates,
     );
 
     if (res.status === DB_METHOD_STATUS.SUCCESS) {
       const updatedMembers = currentMembers.map((item) =>
-        item.id === member.id ? updatedMember : item
+        item.id === member.id ? updatedMember : item,
       );
       setCurrentMembers(updatedMembers);
 
@@ -149,6 +157,23 @@ export function EditFacilityMemberForm({
             )}
           />
         </div>
+        <FormItem>
+          <Label>Gender</Label>
+          <Select value={gender} onValueChange={setGender}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Class" />
+            </SelectTrigger>
+            <SelectContent>
+              {GENDERS.map((item) => {
+                return (
+                  <SelectItem value={item.id} key={`gender-item-${item.id}`}>
+                    {item.label}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </FormItem>
         <FormField
           control={form.control}
           name="mobileNumber"

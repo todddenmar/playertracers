@@ -47,7 +47,7 @@ const formSchema = z.object({
 
 function SignInForm() {
   // 1. Define your form.
-  const { setCurrentUser } = useAppStore();
+  const { setCurrentUser, setCurrentFirebaseUser } = useAppStore();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -89,7 +89,7 @@ function SignInForm() {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         emailAddress,
-        password
+        password,
       );
       const user = userCredential.user;
       getUserData(user.uid);
@@ -106,10 +106,10 @@ function SignInForm() {
       .then((result) => {
         const user = result.user;
         if (user) {
-          setCurrentUser({
+          setCurrentFirebaseUser({
             uid: user.uid,
             displayName: user.displayName || "No name",
-            emailAddress: user.email || "No Email",
+            email: user.email || "No Email",
             photoURL: user.photoURL || null,
           });
         }
@@ -132,12 +132,13 @@ function SignInForm() {
       return;
     }
     const firebaseUser = res.data as TUser;
-    setCurrentUser({
-      uid: firebaseUser.uid,
-      displayName: firebaseUser.displayName || "No name",
-      emailAddress: firebaseUser.emailAddress || "No Email",
-      photoURL: firebaseUser.photoURL || null,
-    });
+    if (firebaseUser.uid)
+      setCurrentFirebaseUser({
+        uid: firebaseUser.uid,
+        displayName: firebaseUser.displayName || "No name",
+        email: firebaseUser.emailAddress || "No Email",
+        photoURL: firebaseUser.photoURL || null,
+      });
   };
   return (
     <Form {...form}>

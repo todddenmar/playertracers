@@ -79,7 +79,7 @@ export function CreateFacilityForm({ setClose }: CreateFacilityFormProps) {
       city: city,
       province: province,
       sportIDs,
-      users: [],
+      facilityUsers: [],
     };
     const res = await dbSetDocument(
       DB_COLLECTION.FACILITIES,

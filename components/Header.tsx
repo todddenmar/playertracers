@@ -1,8 +1,6 @@
 "use client";
-import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { useEffect } from "react";
 import {
   dbFetchCollection,
   dbFetchDocument,
@@ -13,16 +11,11 @@ import { useAppStore } from "@/lib/store";
 import { TFacility, TMembership, TSport } from "@/typings";
 import UserAvatarButton from "./custom-ui/UserAvatarButton";
 import Image from "next/image";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebase";
 import Cookies from "js-cookie";
 function Header() {
-  const [isAdmin, setIsAdmin] = useState(false);
-
   const {
     setCurrentSports,
     setCurrentFacilities,
-    setCurrentUser,
     setCurrentFacility,
     setCurrentMembers,
   } = useAppStore();
@@ -64,27 +57,7 @@ function Header() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        const isAdminEmail =
-          process.env.NEXT_PUBLIC_ADMIN_EMAIL === firebaseUser.email;
-        setIsAdmin(isAdminEmail);
-        setCurrentUser({
-          emailAddress: firebaseUser.email || "",
-          displayName: firebaseUser.displayName || "",
-          photoURL: firebaseUser.photoURL,
-        });
-        console.log({ firebaseUser });
-      } else {
-        setCurrentUser(null);
-        setIsAdmin(false);
-      }
-    });
 
-    return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   useEffect(() => {
     const fetchSports = async () => {
       const res = await dbFetchCollection("sports");
@@ -122,13 +95,6 @@ function Header() {
         <span className="font-bold font-main">PlayerTracers</span>
       </Link>
       <div className="flex items-center gap-2">
-        {isAdmin && (
-          <Button asChild size={"icon"} type="button" variant={"secondary"}>
-            <Link href={"/settings"}>
-              <SettingsIcon />
-            </Link>
-          </Button>
-        )}
         <UserAvatarButton />
       </div>
     </div>

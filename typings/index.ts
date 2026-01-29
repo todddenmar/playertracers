@@ -1,23 +1,31 @@
 import { FieldValue } from "firebase/firestore";
 
-export type TRoleType = "MANAGER" | "VISITOR" | "ADMIN" | "MEMBER";
+export type TRoleType = "MEMBER" | "MANAGER" | "ADMIN";
 export type TSkillLevel =
-  | "Beginner"
-  | "Novice"
-  | "Intermediate"
-  | "Advanced"
-  | "Open / Pro";
+  | "BEGINNER"
+  | "NOVICE"
+  | "INTERMEDIATE"
+  | "ADVANCED_INTERMEDIATE"
+  | "ADVANCED"
+  | "PRO";
 export type TUser = {
   uid?: string;
+  id: string;
+  isVerified: boolean;
   displayName?: string;
   firstName?: string;
   lastName?: string;
   emailAddress: string;
   photoURL?: string | null;
-  username?: string | null;
   createdAt?: string;
-  roleType?: TRoleType;
   timestamp?: FieldValue | string;
+  updatedAt?: string;
+};
+export type TFirebaseUser = {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL: string | null;
 };
 export type TSport = {
   id: string;
@@ -33,6 +41,7 @@ export type TPlayer = {
   alias: string;
   homeFacilityID: string; // where a player is a member
 };
+export type TGender = "MALE" | "FEMALE";
 
 export type TMembership = {
   id: string;
@@ -44,6 +53,7 @@ export type TMembership = {
   createdAt: string;
   skillLevel: string;
   mobileNumber: string;
+  gender: TGender;
 };
 
 export type TSessionType = "RENTAL" | "OPEN_PLAY";
@@ -70,16 +80,12 @@ export type TCourt = {
   description: string;
   orderNumber: number;
   facilityID: string;
+  skillLevels: string[];
 };
 
 export type TFacilityUser = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  emailAddress: string;
-  roleType: TRoleType;
-  createdAt: string;
-  updatedAt?: string;
+  userID: string;
+  roleType: TRoleType | null;
 };
 export type TFacility = {
   id: string;
@@ -89,5 +95,5 @@ export type TFacility = {
   address: string;
   city: string;
   province: string;
-  users: TFacilityUser[];
+  facilityUsers: TFacilityUser[];
 };

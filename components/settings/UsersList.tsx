@@ -1,12 +1,14 @@
-import { TFacilityUser } from "@/typings";
 import { useEffect, useState } from "react";
 import EmptyLayout from "../custom-ui/EmptyLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateNewFacilityUserForm } from "../forms/CreateNewFacilityUserForm";
 import { useAppStore } from "@/lib/store";
-import FacilityUserActionButton from "./action-buttons/FacilityUserActionButton";
+import UserActionButton from "./action-buttons/UserActionButton";
 import { Badge } from "../ui/badge";
 import _ from "lodash";
+import { TUser } from "@/typings";
+import { dbFetchCollectionWhere } from "@/lib/firebase/actions";
+import { DB_COLLECTION, DB_METHOD_STATUS } from "@/lib/config";
 
 type UsersListProps = {
   facilityID: string | null;
@@ -14,15 +16,26 @@ type UsersListProps = {
 
 function UsersList({ facilityID }: UsersListProps) {
   const { currentFacilities } = useAppStore();
-  const [users, setUsers] = useState<TFacilityUser[]>([]);
+  const [users, setUsers] = useState<TUser[]>([]);
   const [tabValue, setTabValue] = useState("users-list");
 
   const facility = currentFacilities.find((item) => item.id === facilityID);
 
   useEffect(() => {
-    const onSetFacilityUsers = () => {
+    const onSetFacilityUsers = async () => {
       if (!facilityID) return;
-      setUsers(facility?.users || []);
+      const res = await dbFetchCollectionWhere({
+        collectionName: DB_COLLECTION.USERS,
+        fieldName: "facilityID",
+        fieldValue: facilityID,
+      });
+      if (res.status === DB_METHOD_STATUS.ERROR) {
+        console.error(res.message);
+        return;
+      }
+      if (res.data) {
+        setUsers((res.data as TUser[]) || []);
+      }
     };
     onSetFacilityUsers();
   }, [facility, currentFacilities, facilityID]);
@@ -46,23 +59,28 @@ function UsersList({ facilityID }: UsersListProps) {
               <EmptyLayout>No users yet</EmptyLayout>
             ) : (
               <div className="grid grid-cols-1 gap-2">
-                {users.map((user) => (
-                  <div
-                    key={`user-item-${user.id}`}
-                    className="border rounded-lg p-4 flex items-center gap-2"
-                  >
-                    <div className="flex-1">
-                      <div className="capitalize">
-                        {user.firstName} {user.lastName}
+                {users.map((user) => {
+                  const facilityUser = facility.facilityUsers.find(
+                    (item) => item.userID === user.id,
+                  );
+                  if (!facilityUser) return null;
+                  return (
+                    <div
+                      key={`user-item-${user.id}`}
+                      className="border rounded-lg p-4 flex items-center gap-2"
+                    >
+                      <div className="flex-1">
+                        <div className="capitalize">
+                          {user.firstName} {user.lastName}
+                        </div>
+                        <Badge>
+                          {_.startCase(facilityUser?.roleType?.toLowerCase())}
+                        </Badge>
                       </div>
-                      <Badge>{_.startCase(user.roleType.toLowerCase())}</Badge>
+                      <UserActionButton user={user} />
                     </div>
-                    <FacilityUserActionButton
-                      facility={facility}
-                      facilityUser={user}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

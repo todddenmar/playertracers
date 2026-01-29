@@ -36,20 +36,11 @@ const formSchema = z
       .trim()
       .min(1, { message: "First name is required." })
       .max(50, { message: "First name must be under 50 characters." }),
-
     lastName: z
       .string()
       .trim()
       .min(1, { message: "Last name is required." })
       .max(50, { message: "Last name must be under 50 characters." }),
-    username: z
-      .string()
-      .trim()
-      .min(3, { message: "Username must be at least 3 characters." })
-      .max(30, { message: "Username must be at most 30 characters." })
-      .regex(/^[a-zA-Z0-9_]+$/, {
-        message: "Username can only contain letters, numbers, and underscores.",
-      }),
     emailAddress: z
       .string()
       .trim()
@@ -71,13 +62,10 @@ function SignUpForm() {
   // 1. Define your form.
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [usernameFound, setUsernameFound] = useState(false);
-  const [checkingUsername, setCheckingUsername] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
       firstName: "",
       lastName: "",
       emailAddress: "",
@@ -85,38 +73,6 @@ function SignUpForm() {
       confirmPassword: "",
     },
   });
-
-  const username = useWatch({
-    control: form.control,
-    name: "username",
-  });
-
-  // Debounce: check username 1s after user stops typing
-  useEffect(() => {
-    if (!username || username.length < 3) return;
-
-    const timeout = setTimeout(async () => {
-      setCheckingUsername(true);
-
-      const res = await dbFetchCollectionWhere({
-        collectionName: DB_COLLECTION.USERS,
-        fieldName: "username",
-        fieldValue: username,
-      });
-
-      if (res.status === DB_METHOD_STATUS.ERROR) {
-        toast.error(res.message);
-        setCheckingUsername(false);
-        return;
-      }
-
-      const resultData = res.data as TUser[];
-      setUsernameFound(resultData.length > 0);
-      setCheckingUsername(false);
-    }, 1000);
-
-    return () => clearTimeout(timeout);
-  }, [username]);
 
   const email = useWatch({
     control: form.control,
@@ -129,7 +85,7 @@ function SignUpForm() {
     const timeout = setTimeout(async () => {
       const q = query(
         collection(db, "users"),
-        where("email", "==", email.trim().toLowerCase())
+        where("email", "==", email.trim().toLowerCase()),
       );
       const snapshot = await getDocs(q);
       setEmailTaken(!snapshot.empty);
@@ -142,11 +98,8 @@ function SignUpForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    const { username, emailAddress, firstName, lastName } = values;
-    if (usernameFound) {
-      toast.error("Username already exist");
-      return;
-    }
+    const { emailAddress, firstName, lastName } = values;
+
     if (emailTaken) {
       toast.error("Email already taken");
       return;
@@ -157,7 +110,7 @@ function SignUpForm() {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         emailAddress.trim(),
-        values.password
+        values.password,
       );
 
       const newUser: TUser = {
@@ -168,9 +121,10 @@ function SignUpForm() {
         lastName: lastName.trim(),
         emailAddress: emailAddress.trim(),
         photoURL: userCredential.user.photoURL,
-        username: username.trim(),
         createdAt: new Date().toISOString(),
         timestamp: serverTimestamp(),
+        isVerified: false,
+        id: crypto.randomUUID(),
       };
 
       if (!newUser.uid) {
@@ -180,7 +134,7 @@ function SignUpForm() {
       const resUser = await dbSetDocument(
         DB_COLLECTION.USERS,
         newUser.uid,
-        newUser
+        newUser,
       );
 
       if (resUser.status === DB_METHOD_STATUS.ERROR) {
@@ -259,19 +213,6 @@ function SignUpForm() {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter username" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -309,7 +250,7 @@ function SignUpForm() {
           />
         </div>
 
-        {isLoading || checkingUsername ? (
+        {isLoading ? (
           <LoadingComponent />
         ) : (
           <div className="flex justify-end">

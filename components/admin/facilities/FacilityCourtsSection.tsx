@@ -12,21 +12,23 @@ import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { ROLE_TYPE } from "@/lib/config";
 import { CreateNewFacilityCourtForm } from "@/components/forms/CreateNewFacilityCourtForm";
+import FacilityCourtActionButton from "@/components/pages/facility/buttons/FacilityCourtActionButton";
 
 function FacilityCourtsSection() {
   const { currentUser, currentCourts, currentFacility } = useAppStore();
   const [isOpenAddCourt, setIsOpenAddCourt] = useState(false);
 
-  const facilityUser = currentFacility?.users?.find(
-    (item) => item.emailAddress === currentUser?.emailAddress
+  const facilityUser = currentFacility?.facilityUsers?.find(
+    (item) => item.userID === currentUser?.id,
   );
+
   return (
     <div className="flex-1 border p-4 rounded-lg flex flex-col gap-4">
       <div className="flex justify-between items-center gap-4">
         <h4 className="text-lg font-semibold">Courts</h4>
-        {facilityUser
+        {facilityUser?.roleType
           ? [ROLE_TYPE.ADMIN, ROLE_TYPE.MANAGER].includes(
-              facilityUser?.roleType
+              facilityUser?.roleType,
             ) && (
               <Button type="button" onClick={() => setIsOpenAddCourt(true)}>
                 <PlusIcon />
@@ -57,15 +59,18 @@ function FacilityCourtsSection() {
               return (
                 <div
                   key={`Court-item-${court.id}`}
-                  className="flex items-center gap-2  border rounded-lg p-2"
+                  className="flex items-center gap-2  border rounded-lg p-2 dark:bg-white/5"
                 >
                   <div className="space-y-2 flex-1">
                     <div>
-                      <div>{court.name}</div>
+                      <div className="font-semibold">{court.name}</div>
+                      <p className="text-sm text-muted-foreground">
+                        {court.description}
+                      </p>
                     </div>
                     <div className="flex justify-end text-muted-foreground text-xs"></div>
                   </div>
-                  {/* <FacilityCourtActionButton court={court} /> */}
+                  <FacilityCourtActionButton court={court} />
                 </div>
               );
             })}

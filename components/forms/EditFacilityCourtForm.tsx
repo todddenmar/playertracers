@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { DB_COLLECTION, DB_METHOD_STATUS, SKILL_LEVELS } from "@/lib/config";
-import { dbSetSubDocument } from "@/lib/firebase/actions";
+import { dbUpdateSubDocument } from "@/lib/firebase/actions";
 import { TCourt } from "@/typings";
 import { useAppStore } from "@/lib/store";
 import LoadingComponent from "../custom-ui/LoadingComponent";
@@ -30,21 +30,25 @@ const FormSchema = z.object({
   orderNumber: z.string(),
 });
 
-type CreateNewFacilityCourtFormProps = {
+type EditNewFacilityCourtFormProps = {
   setClose: () => void;
+  court: TCourt;
 };
-export function CreateNewFacilityCourtForm({
+export function EditNewFacilityCourtForm({
+  court,
   setClose,
-}: CreateNewFacilityCourtFormProps) {
+}: EditNewFacilityCourtFormProps) {
   const { currentFacility, currentCourts, setCurrentCourts } = useAppStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [skillLevels, setSkillLevels] = useState<string[]>([]);
+  const [skillLevels, setSkillLevels] = useState<string[]>(
+    court.skillLevels || [],
+  );
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      orderNumber: "",
+      name: court.name || "",
+      description: court.description || "",
+      orderNumber: court.orderNumber.toString() || "1",
     },
   });
 
@@ -59,27 +63,32 @@ export function CreateNewFacilityCourtForm({
     }
     const { orderNumber, name, description } = data;
     setIsLoading(true);
-    const newCourt: TCourt = {
-      id: crypto.randomUUID(),
+    const updates: Partial<TCourt> = {
       name: name,
       description: description,
       orderNumber: parseInt(orderNumber || "1"),
       facilityID: currentFacility.id,
       skillLevels: skillLevels,
     };
-    const res = await dbSetSubDocument(
+    const updatedCourt = {
+      ...court,
+      ...updates,
+    };
+    const res = await dbUpdateSubDocument(
       DB_COLLECTION.FACILITIES,
       currentFacility.id,
       DB_COLLECTION.COURTS,
-      newCourt.id,
-      newCourt
+      court.id,
+      updates,
     );
 
     if (res.status === DB_METHOD_STATUS.SUCCESS) {
-      const updatedCourts = [...(currentCourts || []), newCourt];
+      const updatedCourts = currentCourts.map((item) =>
+        item.id === court.id ? updatedCourt : item,
+      );
       setCurrentCourts(updatedCourts);
 
-      toast.success("Court added successfully ");
+      toast.success("Court updated successfully ");
       setIsLoading(false);
       setClose();
     }

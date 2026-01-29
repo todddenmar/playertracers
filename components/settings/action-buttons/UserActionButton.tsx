@@ -16,19 +16,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { EditFacilityUserForm } from "@/components/forms/EditFacilityUserForm";
-import { TFacility, TFacilityUser } from "@/typings";
+import { TUser } from "@/typings";
+import { REPEATING_TEXT } from "@/lib/config";
+import Link from "next/link";
+import { EditUserForm } from "@/components/forms/EditFacilityUserForm";
 
-type FacilityUserActionButtonProps = {
-  facility: TFacility;
-  facilityUser: TFacilityUser;
+type UserActionButtonProps = {
+  user: TUser;
 };
-function FacilityUserActionButton({
-  facility,
-  facilityUser,
-}: FacilityUserActionButtonProps) {
+function UserActionButton({ user }: UserActionButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isOpenLink, setIsOpenLink] = useState(false);
   return (
     <div>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -48,26 +47,50 @@ function FacilityUserActionButton({
           >
             Edit User
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              setIsOpen(false);
+              setIsOpenLink(true);
+            }}
+          >
+            Sync User
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Facility User</DialogTitle>
+            <DialogTitle>Update User</DialogTitle>
             <DialogDescription>
-              Please fill all required fields.
+              {REPEATING_TEXT.formDescription}
             </DialogDescription>
           </DialogHeader>
-          <EditFacilityUserForm
-            facility={facility}
-            facilityUser={facilityUser}
-            setClose={() => setIsEditOpen(false)}
-          />
+          <EditUserForm user={user} setClose={() => setIsEditOpen(false)} />
         </DialogContent>
       </Dialog>
+
+      {isOpenLink && (
+        <Dialog open={isOpenLink} onOpenChange={setIsOpenLink}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Firebase User</DialogTitle>
+              <DialogDescription>
+                {REPEATING_TEXT.formDescription}
+              </DialogDescription>
+            </DialogHeader>
+            <div>
+              <Button type="button" asChild className="w-full">
+                <Link href={"/sync-user/" + user.id} target="_blank">
+                  Go To Assignment Link
+                </Link>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
 
-export default FacilityUserActionButton;
+export default UserActionButton;
