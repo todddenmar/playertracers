@@ -96,4 +96,36 @@ export type TFacility = {
   city: string;
   province: string;
   facilityUsers: TFacilityUser[];
+  openingTime?: string;
+  closingTime?: string;
+  isAlwaysOpen?: boolean;
+};
+
+export type TBooking = {
+  id: string;
+  dateFrom: Date;
+  dateTo: Date;
+  createdAt: Date;
+  timestamp: FieldValue;
+  customerEmail: string;
+  customerID?: string;
+  notes: string;
+} & TPaymentDetails;
+
+export type TPaymentDetails = {
+  referenceNumber: string;
+  isPaymentConfirmed: boolean;
+  receiptURL: string;
+  totalAmount: number;
+  customerName: string;
+};
+
+export type TScheduleType = "OPEN_PLAY" | "BOOKING";
+
+export type TSchedule = {
+  id: string;
+  date: Date;
+  createdAt: Date;
+  timestamp: FieldValue;
+  type: TScheduleType;
 };

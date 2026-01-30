@@ -1,4 +1,5 @@
 import {
+  TBooking,
   TCourt,
   TFacility,
   TFirebaseUser,
@@ -17,6 +18,7 @@ export type TAppStoreStates = {
   currentCourts: TCourt[];
   currentUsers: TUser[];
   currentFirebaseUser: TFirebaseUser | null;
+  currentBookings: TBooking[];
 };
 
 export type TAppStoreActions = {
@@ -28,6 +30,7 @@ export type TAppStoreActions = {
   setCurrentCourts: (currentCourts: TCourt[]) => void;
   setCurrentUsers: (currentUsers: TUser[]) => void;
   setCurrentFirebaseUser: (currentFirebaseUser: TFirebaseUser | null) => void;
+  setCurrentBookings: (currentBookings: TBooking[]) => void;
 };
 export const useAppStore = create<TAppStoreStates & TAppStoreActions>(
   (set) => ({
@@ -51,5 +54,7 @@ export const useAppStore = create<TAppStoreStates & TAppStoreActions>(
     currentFirebaseUser: null,
     setCurrentFirebaseUser: (currentFirebaseUser) =>
       set(() => ({ currentFirebaseUser })),
+    currentBookings: [],
+    setCurrentBookings: (currentBookings) => set(() => ({ currentBookings })),
   }),
 );

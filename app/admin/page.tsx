@@ -1,7 +1,7 @@
 "use client";
 import { useAppStore } from "@/lib/store";
 import ErrorCard from "@/components/custom-ui/ErrorCard";
-import Link from "next/link";
+import AdminBookingCalendar from "@/components/pages/sections/AdminBookingCalendar";
 
 function FacilityAdminPage() {
   const { currentFacility } = useAppStore();
@@ -18,9 +18,7 @@ function FacilityAdminPage() {
   }
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <Link href={"/admin/members"}>Members</Link>
-      </div>
+      <AdminBookingCalendar />
     </div>
   );
 }

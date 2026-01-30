@@ -19,6 +19,11 @@ export const ADMIN_LINKS = [
     path: "/admin/courts",
     label: "Courts",
   },
+  {
+    id: "settings",
+    path: "/admin/settings",
+    label: "Settings",
+  },
 ];
 export const SKILL_LEVEL = {
   BEGINNER: {

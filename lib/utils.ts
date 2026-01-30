@@ -109,7 +109,7 @@ export const getShortBankName = (name: string) => {
 
 export const chunkArray = <T>(array: T[], size: number): T[][] => {
   return Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
-    array.slice(i * size, i * size + size)
+    array.slice(i * size, i * size + size),
   );
 };
 
@@ -130,7 +130,7 @@ export function exportToExcel<T>(data: T[], fileName = "data.xlsx") {
 
 export const getElapsedTime = (
   gunStart: string,
-  scanTime: string
+  scanTime: string,
 ): {
   durationStr: string;
   totalSeconds: number;
@@ -195,7 +195,7 @@ export const formatTimeTo12Hour = (time24: string) => {
 
 export const isWithinRegistrationHours = (
   start: string, // e.g. "04:00"
-  end: string // e.g. "21:00"
+  end: string, // e.g. "21:00"
 ) => {
   const now = new Date();
   const [startHour, startMin] = start.split(":").map(Number);
@@ -229,4 +229,11 @@ export const generateColor = (index: number) => {
     "#22d3ee", // cyan
   ];
   return palette[index % palette.length];
+};
+
+export const stringifyDate = (date: Date | null) => {
+  if (!date) {
+    return null;
+  }
+  return format(new Date(date), "EEEE, MMM d");
 };

@@ -26,7 +26,7 @@ import {
   where,
 } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { dbFetchCollectionWhere, dbSetDocument } from "@/lib/firebase/actions";
+import { dbSetDocument } from "@/lib/firebase/actions";
 import { DB_COLLECTION, DB_METHOD_STATUS } from "@/lib/config";
 import { TUser } from "@/typings";
 const formSchema = z

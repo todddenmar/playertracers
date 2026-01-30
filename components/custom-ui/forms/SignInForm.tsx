@@ -47,7 +47,7 @@ const formSchema = z.object({
 
 function SignInForm() {
   // 1. Define your form.
-  const { setCurrentUser, setCurrentFirebaseUser } = useAppStore();
+  const { setCurrentFirebaseUser } = useAppStore();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
